@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Juhannus 2025 🌿</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <title>Juhannus 2026 🌿</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -21,7 +21,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- NAV ---
     window.showPage = function(page) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -29,25 +28,30 @@
       document.getElementById('nav-' + page).classList.add('active');
     }
 
-    // --- KOMMENTIT ---
     async function sendComment() {
       const nameEl = document.getElementById('comment-name');
       const textEl = document.getElementById('comment-text');
       const name = nameEl.value.trim();
       const text = textEl.value.trim();
       if (!name || !text) return;
+      const btn = document.getElementById('send-btn');
+      btn.disabled = true;
       await addDoc(collection(db, 'comments'), { name, text, ts: serverTimestamp() });
       textEl.value = '';
+      btn.disabled = false;
     }
 
     window.sendComment = sendComment;
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Kommentit
       const q = query(collection(db, 'comments'), orderBy('ts', 'asc'));
       onSnapshot(q, snap => {
         const list = document.getElementById('comments-list');
         list.innerHTML = '';
+        if (snap.empty) {
+          list.innerHTML = '<div class="empty-state">Ei vielä kommentteja — ole ensimmäinen! 🎉</div>';
+          return;
+        }
         snap.forEach(d => {
           const data = d.data();
           const div = document.createElement('div');
@@ -58,16 +62,18 @@
         list.scrollTop = list.scrollHeight;
       });
 
-      // Enter-näppäin kommenttiin
       document.getElementById('comment-text').addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendComment(); }
       });
 
-      // --- KAUPPALISTA ---
       const nq = query(collection(db, 'notes'), orderBy('ts', 'asc'));
       onSnapshot(nq, snap => {
         const list = document.getElementById('notes-list');
         list.innerHTML = '';
+        if (snap.empty) {
+          list.innerHTML = '<li class="empty-state">Lista on tyhjä — lisää tuotteita! 🛒</li>';
+          return;
+        }
         snap.forEach(d => {
           const data = d.data();
           const li = document.createElement('li');
@@ -104,86 +110,119 @@
   </script>
   <style>
     :root {
-      --green-dark: #2d4a2d;
-      --green-light: #e8f0e8;
-      --cream: #faf8f3;
-      --gold: #c9a84c;
-      --text: #1a2a1a;
-      --muted: #6b7e6b;
+      --yellow: #FFD93D;
+      --yellow-dark: #f0c400;
+      --turquoise: #06D6A0;
+      --turquoise-dark: #04b888;
+      --coral: #FF6B6B;
+      --coral-dark: #e85555;
+      --sky: #4CC9F0;
+      --bg: #FFFBEE;
+      --text: #1a1a2e;
+      --muted: #7a7a9a;
       --white: #ffffff;
+      --card: #ffffff;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--cream);
+      background: var(--bg);
       color: var(--text);
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
     }
 
+    /* HEADER */
     header {
-      background: var(--green-dark);
-      color: white;
+      background: linear-gradient(135deg, #FFD93D 0%, #FF6B6B 50%, #4CC9F0 100%);
       text-align: center;
-      padding: 2.5rem 1.5rem 2rem;
+      padding: 3rem 1.5rem 2rem;
       position: relative;
       overflow: hidden;
     }
 
-    header::before {
-      content: '';
+    .header-floaties {
       position: absolute;
       inset: 0;
-      background: repeating-linear-gradient(60deg, transparent, transparent 40px, rgba(255,255,255,0.03) 40px, rgba(255,255,255,0.03) 41px);
+      pointer-events: none;
+      overflow: hidden;
     }
 
-    .header-emoji { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
-
-    header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.8rem, 5vw, 3rem);
-      position: relative;
+    .floatie {
+      position: absolute;
+      font-size: 2rem;
+      opacity: 0.25;
+      animation: float 6s ease-in-out infinite;
     }
 
-    header p {
-      margin-top: 0.4rem;
-      color: rgba(255,255,255,0.6);
-      font-size: 0.9rem;
-      position: relative;
+    .floatie:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+    .floatie:nth-child(2) { top: 20%; right: 8%; animation-delay: 1s; }
+    .floatie:nth-child(3) { bottom: 15%; left: 15%; animation-delay: 2s; }
+    .floatie:nth-child(4) { bottom: 10%; right: 12%; animation-delay: 0.5s; }
+    .floatie:nth-child(5) { top: 50%; left: 50%; animation-delay: 1.5s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(5deg); }
     }
 
-    .gold-line { width: 48px; height: 2px; background: var(--gold); margin: 1rem auto 0; position: relative; }
+    .header-inner { position: relative; }
+
+    .header-year {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: clamp(3.5rem, 12vw, 6rem);
+      color: white;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .header-sub {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      color: rgba(255,255,255,0.9);
+      margin-top: 0.3rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .emoji-row {
+      font-size: 1.8rem;
+      margin-top: 1rem;
+      letter-spacing: 0.3rem;
+    }
 
     /* NAV */
     nav {
       background: var(--white);
-      border-bottom: 1px solid #e0eae0;
+      border-bottom: 3px solid var(--yellow);
       display: flex;
       justify-content: center;
-      gap: 0;
       position: sticky;
       top: 0;
       z-index: 10;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
 
     .nav-btn {
-      padding: 0.85rem 1.5rem;
+      padding: 0.9rem 1.4rem;
       border: none;
       background: none;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 500;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
       color: var(--muted);
       cursor: pointer;
-      border-bottom: 2px solid transparent;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -3px;
       transition: all 0.15s;
     }
 
-    .nav-btn.active {
-      color: var(--green-dark);
-      border-bottom-color: var(--green-dark);
-    }
+    .nav-btn.active { color: var(--coral); border-bottom-color: var(--coral); }
+    .nav-btn:hover:not(.active) { color: var(--text); }
 
     /* PAGES */
     .page { display: none; }
@@ -192,126 +231,186 @@
     main {
       max-width: 680px;
       margin: 0 auto;
-      padding: 2rem 1.25rem 4rem;
+      padding: 2rem 1.25rem 5rem;
     }
 
+    /* SECTION TITLE */
     .section-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      color: var(--green-dark);
-      margin-bottom: 1rem;
-      padding-bottom: 0.4rem;
-      border-bottom: 1px solid #d4e4d4;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 1.4rem;
+      color: var(--text);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    /* AIKATAULU */
-    .schedule { margin-bottom: 2.5rem; }
-    .day-block { margin-bottom: 1.5rem; }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 3px;
+      background: linear-gradient(90deg, var(--yellow), transparent);
+      border-radius: 2px;
+    }
+
+    /* DAY BLOCKS */
+    .day-block { margin-bottom: 1.75rem; }
 
     .day-label {
-      font-size: 0.7rem;
-      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.82rem;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 0.5rem;
+      background: var(--turquoise);
+      color: white;
+      padding: 0.25rem 0.8rem;
+      border-radius: 99px;
+      margin-bottom: 0.6rem;
     }
 
     .day-events {
-      background: white;
-      border-radius: 10px;
+      background: var(--card);
+      border-radius: 16px;
       overflow: hidden;
-      border: 1px solid #e0eae0;
+      border: 2px solid #f0f0f0;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
     }
 
     .event {
       display: flex;
-      align-items: flex-start;
-      padding: 0.75rem 1rem;
-      gap: 0.75rem;
-      border-bottom: 1px solid #f0f5f0;
+      align-items: center;
+      padding: 0.85rem 1.1rem;
+      gap: 0.85rem;
+      border-bottom: 1px solid #f5f5f5;
+      transition: background 0.1s;
     }
 
     .event:last-child { border-bottom: none; }
-    .event-icon { font-size: 1.1rem; line-height: 1.4; flex-shrink: 0; width: 1.5rem; text-align: center; }
-    .event-info { flex: 1; }
-    .event-name { font-weight: 500; font-size: 0.95rem; }
-    .event-time { font-size: 0.78rem; color: var(--muted); margin-top: 0.1rem; }
+    .event:hover { background: #fffaf0; }
 
-    /* VASTUUT */
-    .responsibilities { margin-bottom: 2.5rem; }
-
-    .person-card {
-      background: white;
-      border: 1px solid #e0eae0;
-      border-radius: 10px;
-      padding: 1rem 1.1rem;
-      margin-bottom: 0.6rem;
+    .event-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      width: 2rem;
+      text-align: center;
     }
 
-    .person-name {
+    .event-info { flex: 1; }
+
+    .event-name {
       font-weight: 600;
       font-size: 0.95rem;
-      color: var(--green-dark);
-      margin-bottom: 0.45rem;
+      color: var(--text);
+    }
+
+    .event-time {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    /* VASTUUT */
+    .person-card {
+      background: var(--card);
+      border: 2px solid #f0f0f0;
+      border-radius: 16px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.6rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .person-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+
+    .person-name {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .person-name .paikalla { font-size: 0.72rem; font-weight: 400; color: var(--muted); }
-    .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .paikalla {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--muted);
+      background: #f5f5f5;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+    }
 
-    .tag { font-size: 0.78rem; padding: 0.2rem 0.65rem; border-radius: 99px; font-weight: 500; }
-    .tag-ruoka { background: #fff3d6; color: #8a6200; }
-    .tag-aktiviteetti { background: #dff0df; color: #2d5a2d; }
-    .tag-juoma { background: #f0e8ff; color: #5a2d8a; }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+    .tag {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 99px;
+      font-weight: 600;
+    }
+
+    .tag-ruoka { background: #FFF0CC; color: #b07800; }
+    .tag-aktiviteetti { background: #D0F5EB; color: #057a55; }
+    .tag-juoma { background: #FFE0E0; color: #c0392b; }
 
     /* KOMMENTIT */
     #comments-list {
-      background: white;
-      border: 1px solid #e0eae0;
-      border-radius: 10px;
-      padding: 0.75rem;
-      min-height: 200px;
-      max-height: 400px;
+      background: var(--card);
+      border: 2px solid #f0f0f0;
+      border-radius: 16px;
+      padding: 1rem;
+      min-height: 180px;
+      max-height: 380px;
       overflow-y: auto;
       margin-bottom: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.7rem;
     }
 
     .comment-item {
       display: flex;
       gap: 0.6rem;
       align-items: baseline;
+      padding: 0.6rem 0.8rem;
+      background: #fffaf0;
+      border-radius: 10px;
+      border-left: 3px solid var(--yellow);
     }
 
     .comment-author {
-      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
       font-size: 0.85rem;
-      color: var(--green-dark);
+      color: var(--coral);
       white-space: nowrap;
       flex-shrink: 0;
     }
 
-    .comment-text {
+    .comment-text { font-size: 0.9rem; line-height: 1.4; }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
       font-size: 0.9rem;
-      color: var(--text);
-      line-height: 1.4;
+      padding: 2rem;
     }
 
-    .comment-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+    .comment-form { display: flex; flex-direction: column; gap: 0.6rem; }
 
-    .comment-form input, .comment-form textarea {
-      border: 1px solid #d4e4d4;
-      border-radius: 8px;
-      padding: 0.65rem 0.9rem;
+    .comment-form input,
+    .comment-form textarea {
+      border: 2px solid #f0f0f0;
+      border-radius: 12px;
+      padding: 0.7rem 1rem;
       font-family: 'Inter', sans-serif;
       font-size: 0.9rem;
       color: var(--text);
@@ -320,83 +419,117 @@
       transition: border-color 0.15s;
     }
 
-    .comment-form input:focus, .comment-form textarea:focus {
-      border-color: var(--green-dark);
-    }
-
+    .comment-form input:focus,
+    .comment-form textarea:focus { border-color: var(--turquoise); }
     .comment-form textarea { resize: vertical; min-height: 80px; }
 
-    .btn-send {
-      background: var(--green-dark);
+    .btn-primary {
+      background: linear-gradient(135deg, var(--coral), var(--coral-dark));
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 0.7rem 1.5rem;
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 0.9rem;
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
       cursor: pointer;
       align-self: flex-end;
-      transition: background 0.15s;
+      transition: transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 3px 10px rgba(255,107,107,0.3);
     }
 
-    .btn-send:hover { background: #3d6a3d; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(255,107,107,0.4); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
     /* KAUPPALISTA */
-    #notes-list {
-      list-style: none;
-      margin-bottom: 1rem;
-    }
+    #notes-list { list-style: none; margin-bottom: 1rem; }
 
     .note-item {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      background: white;
-      border: 1px solid #e0eae0;
-      border-radius: 8px;
-      padding: 0.7rem 0.9rem;
-      margin-bottom: 0.4rem;
-      transition: opacity 0.15s;
+      gap: 0.7rem;
+      background: var(--card);
+      border: 2px solid #f0f0f0;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.15s;
     }
 
-    .note-item.done .note-text {
-      text-decoration: line-through;
-      color: var(--muted);
+    .note-item:hover { border-color: var(--turquoise); }
+    .note-item.done { opacity: 0.55; }
+    .note-item.done .note-text { text-decoration: line-through; color: var(--muted); }
+
+    .note-check { cursor: pointer; font-size: 1.2rem; flex-shrink: 0; }
+    .note-text { flex: 1; font-size: 0.92rem; font-weight: 500; }
+
+    .note-delete {
+      cursor: pointer;
+      color: #ddd;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.4rem;
+      border-radius: 6px;
+      transition: all 0.1s;
     }
 
-    .note-check { cursor: pointer; font-size: 1.1rem; flex-shrink: 0; }
-    .note-text { flex: 1; font-size: 0.92rem; }
-    .note-delete { cursor: pointer; color: #ccc; font-size: 0.8rem; padding: 0.2rem 0.4rem; border-radius: 4px; }
-    .note-delete:hover { color: #e05555; background: #fff0f0; }
+    .note-delete:hover { color: var(--coral); background: #fff0f0; }
 
-    .note-input-row {
-      display: flex;
-      gap: 0.5rem;
-    }
+    .note-input-row { display: flex; gap: 0.6rem; }
 
     .note-input-row input {
       flex: 1;
-      border: 1px solid #d4e4d4;
-      border-radius: 8px;
-      padding: 0.65rem 0.9rem;
+      border: 2px solid #f0f0f0;
+      border-radius: 12px;
+      padding: 0.7rem 1rem;
       font-family: 'Inter', sans-serif;
       font-size: 0.9rem;
       outline: none;
+      transition: border-color 0.15s;
     }
 
-    .note-input-row input:focus { border-color: var(--green-dark); }
+    .note-input-row input:focus { border-color: var(--turquoise); }
 
-    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.8rem; }
+    .btn-add {
+      background: linear-gradient(135deg, var(--turquoise), var(--turquoise-dark));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0.7rem 1.2rem;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(6,214,160,0.3);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .btn-add:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(6,214,160,0.4); }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 1.5rem;
+      letter-spacing: 0.3rem;
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <span class="header-emoji">🌿</span>
-  <h1>Juhannus 2025</h1>
-  <p>Ohjelma & vastuut</p>
-  <div class="gold-line"></div>
+  <div class="header-floaties">
+    <span class="floatie">🏖️</span>
+    <span class="floatie">🍦</span>
+    <span class="floatie">🏐</span>
+    <span class="floatie">🌊</span>
+    <span class="floatie">☀️</span>
+  </div>
+  <div class="header-inner">
+    <div class="header-year">JUHANNUS</div>
+    <div class="header-sub">2026</div>
+    <div class="emoji-row">🌿 ☀️ 🍹 🕺 🌿</div>
+  </div>
 </header>
 
 <nav>
@@ -410,11 +543,11 @@
   <!-- OHJELMA -->
   <div class="page active" id="page-ohjelma">
 
-    <div class="schedule" style="margin-top:1.5rem">
-      <div class="section-title">Aikataulu</div>
+    <div style="margin-top:1.5rem; margin-bottom:2.5rem;">
+      <div class="section-title">📅 Aikataulu</div>
 
       <div class="day-block">
-        <div class="day-label">Torstai</div>
+        <div class="day-label">🌙 Torstai</div>
         <div class="day-events">
           <div class="event">
             <div class="event-icon">🏕️</div>
@@ -431,7 +564,7 @@
       </div>
 
       <div class="day-block">
-        <div class="day-label">Perjantai</div>
+        <div class="day-label">☀️ Perjantai</div>
         <div class="day-events">
           <div class="event">
             <div class="event-icon">🏃</div>
@@ -465,7 +598,7 @@
       </div>
 
       <div class="day-block">
-        <div class="day-label">Lauantai</div>
+        <div class="day-label">🌞 Lauantai</div>
         <div class="day-events">
           <div class="event">
             <div class="event-icon">🍷</div>
@@ -492,7 +625,7 @@
       </div>
 
       <div class="day-block">
-        <div class="day-label">Sunnuntai</div>
+        <div class="day-label">🌅 Sunnuntai</div>
         <div class="day-events">
           <div class="event">
             <div class="event-icon">☕</div>
@@ -502,8 +635,8 @@
       </div>
     </div>
 
-    <div class="responsibilities">
-      <div class="section-title">Vastuut</div>
+    <div>
+      <div class="section-title">🙋 Vastuut</div>
 
       <div class="person-card">
         <div class="person-name">Ville <span class="paikalla">to–su</span></div>
@@ -561,12 +694,12 @@
   <!-- KOMMENTIT -->
   <div class="page" id="page-kommentit">
     <div style="margin-top:1.5rem">
-      <div class="section-title">Kommentit</div>
+      <div class="section-title">💬 Kommentit</div>
       <div id="comments-list"></div>
       <div class="comment-form">
-        <input id="comment-name" type="text" placeholder="Nimesi" maxlength="30" />
-        <textarea id="comment-text" placeholder="Kirjoita viesti…"></textarea>
-        <button class="btn-send" onclick="sendComment()">Lähetä</button>
+        <input id="comment-name" type="text" placeholder="Nimesi 👤" maxlength="30" />
+        <textarea id="comment-text" placeholder="Kirjoita viesti… 💬"></textarea>
+        <button class="btn-primary" id="send-btn" onclick="sendComment()">Lähetä 🚀</button>
       </div>
     </div>
   </div>
@@ -574,18 +707,18 @@
   <!-- KAUPPALISTA -->
   <div class="page" id="page-kauppalista">
     <div style="margin-top:1.5rem">
-      <div class="section-title">Kauppalista</div>
+      <div class="section-title">🛒 Kauppalista</div>
       <ul id="notes-list"></ul>
       <div class="note-input-row">
-        <input id="note-input" type="text" placeholder="Lisää tuote…" />
-        <button class="btn-send" onclick="addNote()">Lisää</button>
+        <input id="note-input" type="text" placeholder="Lisää tuote… 🥦" />
+        <button class="btn-add" onclick="addNote()">Lisää</button>
       </div>
     </div>
   </div>
 
 </main>
 
-<footer>Juhannus 2025 🌿</footer>
+<footer>🏖️ 🍦 🏐 🌊 ☀️</footer>
 
 </body>
 </html>
